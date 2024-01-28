@@ -28,7 +28,7 @@
 
 - 支持模型：chatGLM_6b_SSE、chatglm_lite、chatglm_lite_32k、chatglm_std、chatglm_pro、chatglm_turbo、glm-3-turbo、glm-4、glm-4v、cogview-3
 
-- maven pom - `已发布到Maven仓库`
+- maven pom - `暂时测试阶段，未推送到 Maven 中央仓库，需要下载代码本地 install 后使用`
 
 ```Pom
 <dependency>
