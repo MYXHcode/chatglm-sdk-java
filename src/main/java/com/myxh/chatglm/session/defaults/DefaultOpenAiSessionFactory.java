@@ -1,7 +1,9 @@
 package com.myxh.chatglm.session.defaults;
 
 import com.myxh.chatglm.IOpenAiApi;
+import com.myxh.chatglm.executor.Executor;
 import com.myxh.chatglm.interceptor.OpenAiHTTPInterceptor;
+import com.myxh.chatglm.model.Model;
 import com.myxh.chatglm.session.Configuration;
 import com.myxh.chatglm.session.OpenAiSession;
 import com.myxh.chatglm.session.OpenAiSessionFactory;
@@ -11,6 +13,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,6 +60,9 @@ public class DefaultOpenAiSessionFactory implements OpenAiSessionFactory
 
         configuration.setOpenAiApi(openAiApi);
 
-        return new DefaultOpenAiSession(configuration);
+        // 4. 实例化执行器
+        HashMap<Model, Executor> executorGroup = configuration.newExecutorGroup();
+
+        return new DefaultOpenAiSession(configuration, executorGroup);
     }
 }

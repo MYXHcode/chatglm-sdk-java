@@ -1,7 +1,9 @@
 package com.myxh.chatglm.session;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.myxh.chatglm.model.ChatCompletionRequest;
+import com.myxh.chatglm.model.ChatCompletionSyncResponse;
+import com.myxh.chatglm.model.ImageCompletionRequest;
+import com.myxh.chatglm.model.ImageCompletionResponse;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 
@@ -15,7 +17,13 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface OpenAiSession
 {
-    EventSource completions(ChatCompletionRequest chatCompletionRequest, EventSourceListener eventSourceListener) throws JsonProcessingException;
+    EventSource completions(ChatCompletionRequest chatCompletionRequest, EventSourceListener eventSourceListener) throws Exception;
 
-    CompletableFuture<String> completions(ChatCompletionRequest chatCompletionRequest) throws InterruptedException;
+    CompletableFuture<String> completions(ChatCompletionRequest chatCompletionRequest) throws Exception;
+
+    ChatCompletionSyncResponse completionsSync(ChatCompletionRequest chatCompletionRequest) throws Exception;
+
+    ImageCompletionResponse genImages(ImageCompletionRequest imageCompletionRequest) throws Exception;
+
+    Configuration configuration();
 }

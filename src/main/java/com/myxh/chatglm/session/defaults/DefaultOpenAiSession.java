@@ -1,22 +1,14 @@
 package com.myxh.chatglm.session.defaults;
 
-import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.myxh.chatglm.IOpenAiApi;
-import com.myxh.chatglm.model.ChatCompletionRequest;
-import com.myxh.chatglm.model.ChatCompletionResponse;
-import com.myxh.chatglm.model.EventType;
+import com.myxh.chatglm.executor.Executor;
+import com.myxh.chatglm.model.*;
 import com.myxh.chatglm.session.Configuration;
 import com.myxh.chatglm.session.OpenAiSession;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -28,80 +20,70 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class DefaultOpenAiSession implements OpenAiSession
 {
-    /**
-     * OpenAi 接口
-     */
     private final Configuration configuration;
+    private final Map<Model, Executor> executorGroup;
 
-    /**
-     * 工厂事件
-     */
-    private final EventSource.Factory factory;
-
-    public DefaultOpenAiSession(Configuration configuration)
+    public DefaultOpenAiSession(Configuration configuration, Map<Model, Executor> executorGroup)
     {
         this.configuration = configuration;
-        this.factory = configuration.createRequestFactory();
+        this.executorGroup = executorGroup;
     }
 
     @Override
-    public EventSource completions(ChatCompletionRequest chatCompletionRequest, EventSourceListener eventSourceListener) throws JsonProcessingException
+    public EventSource completions(ChatCompletionRequest chatCompletionRequest, EventSourceListener eventSourceListener) throws Exception
     {
-        // 构建请求信息
-        Request request = new Request.Builder()
-                .url(configuration.getApiHost().concat(IOpenAiApi.v3_completions).replace("{model}", chatCompletionRequest.getModel().getCode()))
-                .post(RequestBody.create(MediaType.parse("application/json"), chatCompletionRequest.toString()))
-                .build();
+        Executor executor = executorGroup.get(chatCompletionRequest.getModel());
 
-        // 返回事件结果
-        return factory.newEventSource(request, eventSourceListener);
-    }
-
-    @Override
-    public CompletableFuture<String> completions(ChatCompletionRequest chatCompletionRequest) throws InterruptedException
-    {
-        // 用于执行异步任务并获取结果
-        CompletableFuture<String> future = new CompletableFuture<>();
-        StringBuffer dataBuffer = new StringBuffer();
-
-        // 构建请求信息
-        Request request = new Request.Builder()
-                .url(configuration.getApiHost().concat(IOpenAiApi.v3_completions).replace("{model}", chatCompletionRequest.getModel().getCode()))
-                .post(RequestBody.create(MediaType.parse("application/json"), chatCompletionRequest.toString()))
-                .build();
-
-        // 异步响应请求
-        factory.newEventSource(request, new EventSourceListener()
+        if (null == executor)
         {
-            @Override
-            public void onEvent(EventSource eventSource, @Nullable String id, @Nullable String type, String data)
-            {
-                ChatCompletionResponse response = JSON.parseObject(data, ChatCompletionResponse.class);
+            throw new RuntimeException(chatCompletionRequest.getModel() + " 模型执行器尚未实现！");
+        }
 
-                // type 消息类型，add 增量，finish 结束，error 错误，interrupted 中断
-                if (EventType.add.getCode().equals(type))
-                {
-                    dataBuffer.append(response.getData());
-                }
-                else if (EventType.finish.getCode().equals(type))
-                {
-                    future.complete(dataBuffer.toString());
-                }
-            }
+        return executor.completions(chatCompletionRequest, eventSourceListener);
+    }
 
-            @Override
-            public void onClosed(EventSource eventSource)
-            {
-                future.completeExceptionally(new RuntimeException("Request closed before completion"));
-            }
+    @Override
+    public CompletableFuture<String> completions(ChatCompletionRequest chatCompletionRequest) throws Exception
+    {
+        Executor executor = executorGroup.get(chatCompletionRequest.getModel());
 
-            @Override
-            public void onFailure(EventSource eventSource, @Nullable Throwable t, @Nullable Response response)
-            {
-                future.completeExceptionally(new RuntimeException("Request closed before completion"));
-            }
-        });
+        if (null == executor)
+        {
+            throw new RuntimeException(chatCompletionRequest.getModel() + " 模型执行器尚未实现！");
+        }
 
-        return future;
+        return executor.completions(chatCompletionRequest);
+    }
+
+    @Override
+    public ChatCompletionSyncResponse completionsSync(ChatCompletionRequest chatCompletionRequest) throws Exception
+    {
+        Executor executor = executorGroup.get(chatCompletionRequest.getModel());
+
+        if (null == executor)
+        {
+            throw new RuntimeException(chatCompletionRequest.getModel() + " 模型执行器尚未实现！");
+        }
+
+        return executor.completionsSync(chatCompletionRequest);
+    }
+
+    @Override
+    public ImageCompletionResponse genImages(ImageCompletionRequest imageCompletionRequest) throws Exception
+    {
+        Executor executor = executorGroup.get(imageCompletionRequest.getModelEnum());
+
+        if (null == executor)
+        {
+            throw new RuntimeException(imageCompletionRequest.getModel() + " 模型执行器尚未实现！");
+        }
+
+        return executor.genImages(imageCompletionRequest);
+    }
+
+    @Override
+    public Configuration configuration()
+    {
+        return configuration;
     }
 }
