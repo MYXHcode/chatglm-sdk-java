@@ -46,7 +46,7 @@ public class ChatCompletionRequest
      * 请求 ID
      */
     @JsonProperty("request_id")
-    private String requestId = String.format("xfg-%d", System.currentTimeMillis());
+    private String requestId = String.format("myxh-%d", System.currentTimeMillis());
 
     /**
      * do_sample 为 true 时启用采样策略，do_sample 为 false 时采样策略 temperature、top_p 将不生效
