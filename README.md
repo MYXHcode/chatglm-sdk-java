@@ -434,6 +434,8 @@ public void testCurl()
 }
 ```
 
+Curl 命令
+
 ```Shell
 curl -X POST \
         -H "Authorization: Bearer <把获得的 Token 填写这，并去掉两个尖括号>" \
@@ -445,7 +447,7 @@ curl -X POST \
         "sseFormat": "data",
         "temperature": 0.9,
         "incremental": true,
-        "request_id": "xfg-1696992276607",
+        "request_id": "myxh-1696992276607",
         "prompt": [
         {
         "role": "user",
@@ -456,6 +458,36 @@ curl -X POST \
   http://open.bigmodel.cn/api/paas/v3/model-api/chatglm_lite/sse-invoke
 ```
 
+Invoke-WebRequest 命令
+
+```shell
+$headers = @{  
+    "Authorization" = "Bearer <把获得的 Token 填写这，并去掉两个尖括号>";  
+    "Content-Type" = "application/json";  
+    "User-Agent" = "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)";  
+    "Accept" = "text/event-stream"  
+}  
+  
+$body = @"  
+{  
+    "top_p": 0.7,  
+    "sseFormat": "data",  
+    "temperature": 0.9,  
+    "incremental": true,  
+    "request_id": "myxh-1696992276607",  
+    "prompt": [  
+        {  
+            "role": "user",  
+            "content": "写个 java 冒泡排序"  
+        }  
+    ]  
+}  
+"@  
+  
+$response = Invoke-WebRequest -Method POST -Uri "http://open.bigmodel.cn/api/paas/v3/model-api/chatglm_lite/sse-invoke" -Headers $headers -Body $body -ContentType "application/json"  
+  
+$response.Content
+```
 - 运行后你会获得一个 Token 信息，之后在 curl.sh 中替换  Authorization: Bearer 后面的值。就可以执行测试了。
 
 - [curl.sh](https://github.com/MYXHcode/chatglm-sdk-java/blob/master/docs/curl/curl.sh) | [curl-cogview-3.sh](https://github.com/MYXHcode/chatglm-sdk-java/blob/master/docs/curl/curl-cogview-3.sh) | [curl-glm-3-turbo.sh](https://github.com/MYXHcode/chatglm-sdk-java/blob/master/docs/curl/curl-glm-3-turbo.sh) | [curl-glm-4.sh](https://github.com/MYXHcode/chatglm-sdk-java/blob/master/docs/curl/curl-glm-4.sh) | [curl-glm-4v.sh](https://github.com/MYXHcode/chatglm-sdk-java/blob/master/docs/curl/curl-glm-4v.sh)
