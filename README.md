@@ -1,6 +1,6 @@
 # 智谱 Ai 大模型开放 SDK - By MYXH
 
-为了让研发伙伴更快，更方便的接入使用智谱 Ai 大模型。从而开发的 chatglm-sdk-java 也欢迎👏🏻大家基于智谱API接口补充需要的功能。
+为了让研发伙伴更快，更方便的接入使用智谱 Ai 大模型。从而开发的 chatglm-sdk-java，也欢迎👏🏻大家基于智谱API接口补充需要的功能。
 
 此SDK设计，以 Session 会话模型，提供工厂🏭创建服务。代码非常清晰，易于扩展、易于维护。你的 PR/ISSUE 贡献💐会让 AI 更加璀璨，[感谢智谱AI团队](https://www.zhipuai.cn/)。
 
